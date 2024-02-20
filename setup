@@ -21,8 +21,6 @@ LINUX="$( ls -t /boot/vmlinuz* | head -n 1 )"
 INITRD="$( sed -e 's#vmlinuz#initrd\.img#g' <<< "${LINUX}" )"
 # Grabs file location to append to tpm2keyunlock.service
 BASEDIR=$(pwd)
-# List of packages to install before compiling tpm2-tss
-PACKAGES=( 'autoconf-archive' 'm4' 'libgcrypt20-dev' 'libjson-c-dev' 'uuid-dev' 'libcmocka0' 'libcmocka-dev' 'build-essential' 'git' 'pkg-config' 'gcc' 'g++' 'm4' 'libtool' 'automake' 'autoconf' 'libdbus-glib-1-dev' 'libssl-dev' 'cmake' 'libssl-dev' 'libcurl4-gnutls-dev' 'doxygen' 'efitools' 'tpm2-abrmd' 'tpm2-tools' 'libltdl-dev')
 CONTINUE=''
 PASSWORD=''
 
@@ -62,16 +60,7 @@ if [ $(ls /dev/ | grep -P "tpm[0-9]+") = "" ]; then
 	echo "No TPM device found in /dev/. This typically means the device is disabled in BIOS or does not exist."
 fi
 
-for pkg in "${PACKAGES[@]}";do
-	if ! dpkg -l "${pkg}" | grep '^ii '; then
-		if ! apt install -y "${pkg}"; then
-			echo "Error installing ${pkg}" >&2
-			exit 1
-		fi
-	fi
-done
-
-apt-get install -y glib2.0 || (echo "Could not install glib2.0"; exit 1)
+apt-get install -y 'autoconf-archive' 'm4' 'libgcrypt20-dev' 'libjson-c-dev' 'uuid-dev' 'libcmocka0' 'libcmocka-dev' 'build-essential' 'git' 'pkg-config' 'gcc' 'g++' 'm4' 'libtool' 'automake' 'autoconf' 'libdbus-glib-1-dev' 'libssl-dev' 'cmake' 'libssl-dev' 'libcurl4-gnutls-dev' 'doxygen' 'efitools' 'tpm2-abrmd' 'tpm2-tools' 'libltdl-dev' 'glib2.0'
 
 cd /usr/local/src || exit 1
 git clone https://github.com/tpm2-software/tpm2-tss.git
@@ -79,7 +68,7 @@ git clone https://github.com/tpm2-software/tpm2-tss.git
 cd /usr/local/src/tpm2-tss || exit 1
 ./bootstrap
 ./configure --with-udevrulesdir=/etc/udev/rules.d
-if make; then
+if make -j2; then
 	if ! make install; then
 		echo "Unable to install tpm2-tss" >&2
 		exit 1
