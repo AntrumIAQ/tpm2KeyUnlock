@@ -143,6 +143,7 @@ cp KEK.auth /boot/efi/EFI/BOOT/
 
 echo "Enter password for MOK Enrollment:"
 mokutil --import db.cer KEK.cer
+mokutil --timeout -1
 
 echo "root=$ROOT panic=60" > cmdline.txt
 
